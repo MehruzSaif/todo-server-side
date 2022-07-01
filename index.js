@@ -27,8 +27,6 @@ async function run() {
 
         app.patch("/task-complete/:id", async (req, res) => {
             const id = req.params.id;
-            // const query = { _id: ObjectId(id) };
-            console.log(id);
 
             const filter = { _id: ObjectId(id) };
             const updateTask = {
@@ -39,11 +37,36 @@ async function run() {
             const result = await taskCollection.updateOne(filter, updateTask);
             console.log(result);
             res.send(result);
+        });
 
+
+        // to add task
+        app.post("/add-task", async (req, res) => {
+            const { taskName } = req.body;
+            let task = {
+                taskName: taskName,
+                isComplete: false,
+            };
+            const id = (await taskCollection.insertOne(task)).insertedId;
+            if (id) {
+                res.send({ success: true, msg: "Task added successfully" });
+            }
+        });
+
+        app.patch("/edit-task/:id", async(req, res) => {
+            const id = req.params.id;
+
+            const { taskName } = req.body;
+            const filter = { _id: ObjectId(id) };
+            const updateTask = {
+                $set: {
+                    taskName: taskName,
+                },
+            };
+            const result = await taskCollection.updateOne(filter, updateTask);
+            res.send(result);
         });
     }
-
-
 
     finally {
 
